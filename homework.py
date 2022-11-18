@@ -33,7 +33,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-handler = RotatingFileHandler('my_logger.log', maxBytes=50000000, backupCount=5)
+handler = RotatingFileHandler(
+    'my_logger.log', maxBytes=50000000, backupCount=5)
 logger.addHandler(handler)
 formatter = logging.Formatter(
     '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -42,6 +43,7 @@ handler.setFormatter(formatter)
 
 
 def send_message(bot, message):
+    """Отправляет сообщение в чат Telegram."""
     try:
         bot.send_message(TELEGRAM_CHAT_ID, message)
     except TelegramError as error:
@@ -49,16 +51,19 @@ def send_message(bot, message):
 
 
 def get_api_answer(current_timestamp):
+    """Делает запрос к ENDPOINT сервера."""
     timestamp = current_timestamp or int(time.time())
     params = {'from_date': timestamp}
     try:
-        response = requests.get(ENDPOINT, headers=HEADERS, params=params).json()
+        response = requests.get(
+            ENDPOINT, headers=HEADERS, params=params).json()
         return response
     except JSONDecodeError:
         logger.error('JSON не сформирован')
 
 
 def check_response(response):
+    """Проверяет ответ API."""
     if type(response) is not dict:
         raise TypeError('API не соответствует ожиданиям')
     if not response.get('homeworks'):
@@ -67,6 +72,7 @@ def check_response(response):
 
 
 def parse_status(homework):
+    """Извлекает статус работы."""
     homework_name = homework.get('homework_name')
     homework_status = homework.get('status')
     if homework_status not in HOMEWORK_STATUSES.keys():
@@ -76,6 +82,7 @@ def parse_status(homework):
 
 
 def check_tokens():
+    """Проверяет доступность пременных окружения."""
     tokens = (
         TELEGRAM_CHAT_ID,
         TELEGRAM_TOKEN,
