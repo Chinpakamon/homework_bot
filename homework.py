@@ -100,7 +100,7 @@ def check_tokens():
 def main():
     """Основная логика работы бота."""
     if not check_tokens():
-        raise ValueError(f'Отсутствует токен')
+        raise ValueError('Отсутствует токен')
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
     current_timestamp = int(time.time()) - 2678400
     while True:
