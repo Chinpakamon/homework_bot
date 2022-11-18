@@ -59,7 +59,8 @@ def get_api_answer(current_timestamp):
         response = requests.get(
             ENDPOINT, headers=HEADERS, params=params)
         if response.status_code != 200:
-            raise ConnectionError("API возвращает код, отличный от 200")
+            raise ConnectionError(
+                "API возвращает код, отличный от 200")
         return response.json()
     except JSONDecodeError:
         logger.error('JSON не сформирован')
