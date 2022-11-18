@@ -57,6 +57,8 @@ def get_api_answer(current_timestamp):
     try:
         response = requests.get(
             ENDPOINT, headers=HEADERS, params=params).json()
+        if response.status_code != 200:
+            raise response.ConnectionError('API возвращает код, отличный от 200')
         return response
     except JSONDecodeError:
         logger.error('JSON не сформирован')
@@ -66,8 +68,12 @@ def check_response(response):
     """Проверяет ответ API."""
     if type(response) is not dict:
         raise TypeError('API не соответствует ожиданиям')
+    if 'homeworks' not in response:
+        raise KeyError(
+            'В ответе API отсутствует ключ homeworks')
     if not response.get('homeworks'):
-        return {}
+        raise IndexError(
+            'Список домашних работ не содержит элементов')
     return response.get('homeworks')[0]
 
 
