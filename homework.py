@@ -81,8 +81,8 @@ def check_response(response):
 
 def parse_status(homework):
     """Извлекает статус работы."""
-    homework_name = homework.get('homework_name')
-    homework_status = homework.get('status')
+    homework_name = homework['homework_name']
+    homework_status = homework['status']
     if homework_status not in HOMEWORK_STATUSES.keys():
         raise ValueError('Не соответствует справочнику статусов')
     verdict = HOMEWORK_STATUSES[homework_status]
