@@ -80,8 +80,8 @@ def check_response(response):
 
 def parse_status(homework):
     """Извлекает статус работы."""
-    homework_name = homework['homeworks'][0]['homework_name']
-    homework_status = homework['homeworks'][0]['status']
+    homework_name = homework['homework_name']
+    homework_status = homework['status']
     if homework_status not in HOMEWORK_STATUSES.keys():
         raise ValueError(
             f'Неизвестный статус домашней работы - {homework_status}'
@@ -125,7 +125,7 @@ def main():
             response = get_api_answer(current_timestamp)
             home_work_2 = check_response(response)['status']
             if home_work_1 != home_work_2:
-                message = parse_status(response)
+                message = parse_status(response['homeworks'][0])
                 send_message(bot, message)
             else:
                 message = 'Статус работы не изменился'
