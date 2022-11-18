@@ -54,10 +54,13 @@ def get_api_answer(current_timestamp):
     """Делает запрос к ENDPOINT сервера."""
     timestamp = current_timestamp or int(time.time())
     params = {'from_date': timestamp}
+
     try:
         response = requests.get(
-            ENDPOINT, headers=HEADERS, params=params).json()
-        return response
+            ENDPOINT, headers=HEADERS, params=params)
+        if response.status_code != 200:
+            raise ConnectionError("API возвращает код, отличный от 200")
+        return response.json()
     except JSONDecodeError:
         logger.error('JSON не сформирован')
 
