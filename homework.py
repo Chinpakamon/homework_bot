@@ -2,7 +2,6 @@ import os
 import logging
 import time
 from logging.handlers import RotatingFileHandler
-from json.decoder import JSONDecodeError
 
 import requests
 import telegram
@@ -61,8 +60,8 @@ def get_api_answer(current_timestamp):
             raise ConnectionError(
                 "API возвращает код, отличный от 200")
         return response.json()
-    except JSONDecodeError:
-        logger.error('JSON не сформирован')
+    except Exception as error:
+        logger.error(f'Ошибка - {error}')
 
 
 def check_response(response):
@@ -79,6 +78,7 @@ def check_response(response):
 
 
 def parse_status(homework):
+    print(type(homework))
     """Извлекает статус работы."""
     homework_name = homework['homework_name']
     homework_status = homework['status']
