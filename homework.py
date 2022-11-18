@@ -54,7 +54,6 @@ def get_api_answer(current_timestamp):
     """Делает запрос к ENDPOINT сервера."""
     timestamp = current_timestamp or int(time.time())
     params = {'from_date': timestamp}
-
     try:
         response = requests.get(
             ENDPOINT, headers=HEADERS, params=params)
@@ -81,10 +80,12 @@ def check_response(response):
 
 def parse_status(homework):
     """Извлекает статус работы."""
-    homework_name = homework['homework_name']
-    homework_status = homework['status']
+    homework_name = homework['homeworks'][0]['homework_name']
+    homework_status = homework['homeworks'][0]['status']
     if homework_status not in HOMEWORK_STATUSES.keys():
-        raise ValueError('Не соответствует справочнику статусов')
+        raise ValueError(
+            f'Неизвестный статус домашней работы - {homework_status}'
+        )
     verdict = HOMEWORK_STATUSES[homework_status]
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
 
