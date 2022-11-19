@@ -2,6 +2,7 @@ import os
 import logging
 import time
 from logging.handlers import RotatingFileHandler
+from json.decoder import JSONDecodeError
 
 import requests
 import telegram
@@ -45,6 +46,7 @@ def send_message(bot, message):
     """Отправляет сообщение в чат Telegram."""
     try:
         bot.send_message(TELEGRAM_CHAT_ID, message)
+        logger.info('Сообщение отправлено в чат Telegram.')
     except TelegramError as error:
         logging.error(f'Ошибка: {error}')
 
@@ -60,8 +62,8 @@ def get_api_answer(current_timestamp):
             raise ConnectionError(
                 "API возвращает код, отличный от 200")
         return response.json()
-    except Exception as error:
-        logger.error(f'Ошибка - {error}')
+    except JSONDecodeError as error:
+        logger.error(f'API возвращает код, отличный от 200. Ошибка - {error}')
 
 
 def check_response(response):
@@ -79,12 +81,10 @@ def check_response(response):
 
 def parse_status(homework):
     """Извлекает статус работы."""
-    homework_name = homework['homework_name']
-    homework_status = homework['status']
-    if homework_status not in HOMEWORK_STATUSES.keys():
-        raise ValueError(
-            f'Неизвестный статус домашней работы - {homework_status}'
-        )
+    if 'homework_name' not in homework:
+        raise KeyError('Неизвестное имя домашней работы')
+    homework_name = homework.get('homework_name')
+    homework_status = homework.get('status')
     verdict = HOMEWORK_STATUSES[homework_status]
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
 
@@ -108,7 +108,7 @@ def check_tokens():
 def main():
     """Основная логика работы бота."""
     if not check_tokens():
-        raise ValueError('Отсутствует токен')
+        raise ValueError('Отсутствуют переменные окружения.')
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
     current_timestamp = int(time.time()) - 2678400
     while True:
