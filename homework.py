@@ -1,3 +1,4 @@
+import http
 import os
 import logging
 import time
@@ -58,12 +59,19 @@ def get_api_answer(current_timestamp):
     try:
         response = requests.get(
             ENDPOINT, headers=HEADERS, params=params)
-        if response.status_code != 200:
+        if response.status_code != http.HTTPStatus.OK:
             raise ConnectionError(
                 "API возвращает код, отличный от 200")
         return response.json()
-    except JSONDecodeError as error:
-        logger.error(f'API возвращает код, отличный от 200. Ошибка - {error}')
+    except requests.exceptions.HTTPError as error_http:
+        logger.error(f'Http Error: {error_http}')
+    except requests.exceptions.ConnectionError as error_connect:
+        logger.error(f'Ошибка подключения: {error_connect}')
+    except requests.exceptions.RequestException as error_request:
+        logger.error(f'Ошибка запроса: {error_request}')
+    except JSONDecodeError as error_json:
+        logger.error(f'API возвращает код, отличный от 200. '
+                     f'Ошибка - {error_json}')
 
 
 def check_response(response):
@@ -85,6 +93,8 @@ def parse_status(homework):
         raise KeyError('Неизвестное имя домашней работы')
     homework_name = homework.get('homework_name')
     homework_status = homework.get('status')
+    if homework_status not in HOMEWORK_STATUSES.keys():
+        raise KeyError(f'Ключа {homework_status} нет в словаре')
     verdict = HOMEWORK_STATUSES[homework_status]
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
 
@@ -94,15 +104,13 @@ def check_tokens():
     tokens = (
         TELEGRAM_CHAT_ID,
         TELEGRAM_TOKEN,
-        PRACTICUM_TOKEN
+        PRACTICUM_TOKEN,
     )
     tokens_env = []
     for i in tokens:
         if i is None:
             tokens_env.append(i)
-    if len(tokens_env) != 0:
-        return False
-    return True
+    return len(tokens_env) == 0
 
 
 def main():
